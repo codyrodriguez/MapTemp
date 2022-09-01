@@ -27,8 +27,9 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private lateinit var mMap: GoogleMap
 
-    var temp = ""
+    //var temp = "1"
 
+    //val df = DecimalFormat("#.##")
 
     private fun getWeather(latLng: LatLng) {
         val weatherApi = RetrofitHelper
@@ -76,13 +77,18 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
             getWeather(location)
 
+
+
             mMap.addMarker(
-                MarkerOptions().position(location).title("Temp is $temp, at Lat: ${location.latitude.roundToInt()}, Long: ${location.longitude.roundToInt()}")
+
+                MarkerOptions().position(location).title("Temp is ${((temp.toDouble() - 273.15)*1.8+32).toInt()} °F, at Lat: ${location.latitude.roundToInt()}, Long: ${location.longitude.roundToInt()}")
             ) //add marker at location
 
             mMap.moveCamera(CameraUpdateFactory.newLatLng(location)) //Set up camera based on the location
 
         }
+
+
 
         // mMap.setOnMapLongClickListener {  }
 
@@ -90,6 +96,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
         //  mMap.moveCamera(CameraUpdateFactory.newLatLng(location))
     }
-
+    var temp = "1"
 
 }
