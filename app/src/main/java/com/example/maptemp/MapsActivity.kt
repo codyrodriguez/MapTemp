@@ -3,6 +3,8 @@ package com.example.maptemp
 import android.location.Geocoder
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 
 //MapImports
 import com.google.android.gms.maps.CameraUpdateFactory
@@ -18,6 +20,7 @@ import android.util.Log
 import android.widget.Toast
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import kotlin.math.roundToInt
 
 
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
@@ -25,6 +28,32 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var mMap: GoogleMap
 
     var temp = ""
+
+
+    private fun getWeather(latLng: LatLng) {
+        val weatherApi = RetrofitHelper
+            .getInstance()
+            .create(WeatherApi::class.java)
+        // launching a new coroutine
+        GlobalScope.launch {
+            val result =
+                weatherApi.getWeather(latLng.latitude.toString(), latLng.longitude.toString())
+            if (result != null)
+            // Checking the results
+                Log.d("mapTemp11111: ", result.body().toString())
+            temp = result.body()?.main?.temp.toString()
+
+            Handler(Looper.getMainLooper()).postDelayed({
+                Toast.makeText(this@MapsActivity, "Toast", Toast.LENGTH_SHORT).show()
+            }, 1000L)
+
+
+
+        }
+
+    }
+
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -48,7 +77,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             getWeather(location)
 
             mMap.addMarker(
-                MarkerOptions().position(location).title("$location is $temp")
+                MarkerOptions().position(location).title("Temp is $temp, at Lat: ${location.latitude.roundToInt()}, Long: ${location.longitude.roundToInt()}")
             ) //add marker at location
 
             mMap.moveCamera(CameraUpdateFactory.newLatLng(location)) //Set up camera based on the location
@@ -62,23 +91,5 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         //  mMap.moveCamera(CameraUpdateFactory.newLatLng(location))
     }
 
-    private fun getWeather(latLng: LatLng) {
-        val weatherApi = RetrofitHelper
-            .getInstance()
-            .create(WeatherApi::class.java)
-        // launching a new coroutine
-        GlobalScope.launch {
-            val result =
-                weatherApi.getWeather(latLng.latitude.toString(), latLng.longitude.toString())
-            if (result != null)
-            // Checking the results
-                Log.d("mapTemp11111: ", result.body().toString())
-            temp = result.body()?.main?.temp.toString()
-        }
 
-    }
 }
-
-
-
-
