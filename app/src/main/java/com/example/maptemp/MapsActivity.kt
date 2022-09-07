@@ -1,10 +1,7 @@
 package com.example.maptemp
 
-import android.location.Geocoder
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 
 //MapImports
 import com.google.android.gms.maps.CameraUpdateFactory
@@ -13,46 +10,20 @@ import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
-import com.example.maptemp.databinding.ActivityMapsBinding
 
 //weather json imports
 import android.util.Log
-import android.widget.Toast
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import kotlin.math.roundToInt
 
 
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private lateinit var mMap: GoogleMap
 
-    //var temp = "1"
+    private var temp = "1"
 
     //val df = DecimalFormat("#.##")
-
-    private fun getWeather(latLng: LatLng) {
-        val weatherApi = RetrofitHelper
-            .getInstance()
-            .create(WeatherApi::class.java)
-        // launching a new coroutine
-        GlobalScope.launch {
-            val result =
-                weatherApi.getWeather(latLng.latitude.toString(), latLng.longitude.toString())
-            if (result != null)
-            // Checking the results
-                Log.d("mapTemp11111: ", result.body().toString())
-            temp = result.body()?.main?.temp.toString()
-
-            Handler(Looper.getMainLooper()).postDelayed({
-                Toast.makeText(this@MapsActivity, "Toast", Toast.LENGTH_SHORT).show()
-            }, 1000L)
-
-
-
-        }
-
-    }
 
 
 
@@ -75,13 +46,14 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
         mMap.setOnMapLongClickListener { location ->
 
-            getWeather(location)
+
+            getWeather(location) //get the weather based on the marker location
 
 
 
             mMap.addMarker(
 
-                MarkerOptions().position(location).title("Temp is ${((temp.toDouble() - 273.15)*1.8+32).toInt()} °F, at Lat: ${location.latitude.roundToInt()}, Long: ${location.longitude.roundToInt()}")
+                MarkerOptions().position(location).title("Temp is ${((temp.toDouble() - 273.15)*1.8+32).toInt()} °F, at Lat: ${String.format("%.3f",location.latitude )}, Long: ${String.format("%.3f",location.longitude )}")
             ) //add marker at location
 
             mMap.moveCamera(CameraUpdateFactory.newLatLng(location)) //Set up camera based on the location
@@ -90,12 +62,32 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
 
 
-        // mMap.setOnMapLongClickListener {  }
-
-        //  mMap.addMarker(MarkerOptions().position(location).title("Marker in $location"))
-
-        //  mMap.moveCamera(CameraUpdateFactory.newLatLng(location))
     }
-    var temp = "1"
+
+
+    private fun getWeather(latLng: LatLng) {
+        val weatherApi = RetrofitHelper
+            .getInstance()
+            .create(WeatherApi::class.java)
+        // launching a new coroutine
+        GlobalScope.launch {
+            val result =
+                weatherApi.getWeather(latLng.latitude.toString(), latLng.longitude.toString())
+            if (result != null)
+            // Checking the results
+                Log.d("mapTemp11111: ", result.body().toString())
+            temp = result.body()?.main?.temp.toString()
+
+            /*Handler(Looper.getMainLooper()).postDelayed({
+                Toast.makeText(this@MapsActivity, "Toast", Toast.LENGTH_SHORT).show()
+            }, 1000L)*/
+
+
+
+        }
+
+    }
+
+
 
 }
