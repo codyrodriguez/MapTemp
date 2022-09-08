@@ -2,7 +2,6 @@ package com.example.maptemp
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-
 //MapImports
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
@@ -10,7 +9,6 @@ import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
-
 //weather json imports
 import android.util.Log
 import kotlinx.coroutines.GlobalScope
@@ -21,16 +19,11 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private lateinit var mMap: GoogleMap
 
-    private var temp = "1"
-
-    //val df = DecimalFormat("#.##")
-
-
+    var temp = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // binding = ActivityMapsBinding.inflate(layoutInflater)
         setContentView(R.layout.activity_maps)
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
@@ -45,25 +38,9 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         // Add a marker in Sydney and move the camera]
 
         mMap.setOnMapLongClickListener { location ->
-
-
             getWeather(location) //get the weather based on the marker location
-
-
-
-            mMap.addMarker(
-
-                MarkerOptions().position(location).title("Temp is ${((temp.toDouble() - 273.15)*1.8+32).toInt()} °F, at Lat: ${String.format("%.3f",location.latitude )}, Long: ${String.format("%.3f",location.longitude )}")
-            ) //add marker at location
-
-            mMap.moveCamera(CameraUpdateFactory.newLatLng(location)) //Set up camera based on the location
-
         }
-
-
-
     }
-
 
     private fun getWeather(latLng: LatLng) {
         val weatherApi = RetrofitHelper
@@ -78,16 +55,24 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                 Log.d("mapTemp11111: ", result.body().toString())
             temp = result.body()?.main?.temp.toString()
 
-            /*Handler(Looper.getMainLooper()).postDelayed({
-                Toast.makeText(this@MapsActivity, "Toast", Toast.LENGTH_SHORT).show()
-            }, 1000L)*/
-
-
-
+            runOnUiThread {
+                setMarker(latLng)
+            }
         }
-
     }
 
+    private fun setMarker(latLng: LatLng) {
+        mMap.addMarker(
 
-
+            MarkerOptions().position(latLng).title(
+                "Temp is ${((temp.toDouble() - 273.15) * 1.8 + 32).toInt()} °F, at Lat: ${
+                    String.format(
+                        "%.3f",
+                        latLng.latitude
+                    )
+                }, Long: ${String.format("%.3f", latLng.longitude)}"
+            )
+        ) //add marker at location
+        mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng)) //Set up camera based on the location
+    }
 }
